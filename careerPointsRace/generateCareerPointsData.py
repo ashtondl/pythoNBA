@@ -8,6 +8,7 @@ BASE_URL = "https://www.basketball-reference.com/"
 GAME_LOG_DIR = '/gamelog/'
 PLAYER_PROFILE_PAGE = ".html"
 
+'''
 players_dict = {
 	'Kareen Abdul-Jabbar' : 'players/a/abdulka01',
 	'LeBron James' : 'players/j/jamesle01',
@@ -61,6 +62,37 @@ csv_list = [
 	'Jason_Terry',
 	'Tony_Parker'
 ]
+'''
+
+players_dict = {
+	'Kareem Abdul-Jabbar' : 'players/a/abdulka01',
+	'LeBron James' : 'players/j/jamesle01',
+	'Karl Malone' : 'players/m/malonka01',
+	'Kobe Bryant' : 'players/b/bryanko01',
+	'Michael Jordan' : 'players/j/jordami01',
+	'Wilt Chamberlin' : 'players/c/chambwi01',
+	'Dirk Nowitzki' : 'players/n/nowitdi01'
+}
+
+players_list = [
+	'Kareem Abdul-Jabbar',
+	'LeBron James',
+	'Karl Malone',
+	'Kobe Bryant',
+	#'Michael Jordan',
+	'Wilt Chamberlin',
+	'Dirk Nowitzki'
+]
+
+csv_list = [
+	'Kareem_Abdul-Jabbar',
+	'LeBron_James',
+	'Karl_Malone',
+	'Kobe_Bryant',
+	#'Michael_Jordan',
+	'Wilt_Chamberlin',
+	'Dirk_Nowitzki'
+]
 
 def getSoupFromURL(url):
 	try:
@@ -79,9 +111,10 @@ def get_data_for_player(player):
     return BASE_URL + players_dict[player] + PLAYER_PROFILE_PAGE
 
 seasons_for_players = []
-
+7
 for player in players_list:
     soup = getSoupFromURL(get_data_for_player(player))
+    print(player)
     table = soup.find('table', attrs={"class" : "row_summable"})
     table_body = table.find('tbody')
     rows = table_body.find_all('tr')
@@ -111,4 +144,4 @@ for player, seasons, file_name in zip(players_list, seasons_for_players, csv_lis
             list_rows.append([player, game_count, points_sum])
     data_frame = pd.DataFrame(data=list_rows, columns=['PLAYER_NAME', 'GAME_CAREER', 'TOTAL_3MADE'])
     path = ''
-    data_frame.to_csv(file_name + ".csv", header=True)
+    data_frame.to_csv('Player_Data\\' + file_name + ".csv", header=True)

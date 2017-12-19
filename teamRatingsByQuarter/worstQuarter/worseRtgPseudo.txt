@@ -1,0 +1,57 @@
+[Off/Def]Rtg Graph Pseudocode
+
+# Graphs all team's worst quarter relative to the other three, quantified using netRtg (OffRtg - DefRtg) 
+# Graph as Directed Tuple. Arrow points from 3Quarter 'baseline' to Quarter of interest
+# Easily modified to graph [Best, Most Different, Particular] Quarter vs. 3 Quarter 'baseline' 
+# 'Baseline' marker is Team Logo, Arrow Color is primary team color  
+
+	FETCH quarterRtg_stats FROM stats.nba.com FOR EACH quarter
+	SAVE IN nba_stats.csv
+
+	INIT 2x(4x3) dataArray AND outputArray(2x2) FOR EACH team
+	
+	DataArray Format(1x3):
+		ORtg(4x3): 					DRtg(4x3): 					NetRtg(4x3)
+			Q1:	qOR	xOR	netOR			Q1:	qDR	xDR	netDR			Q1:	qNR	xNR	netNR
+			Q2:	qOR	xOR	netOR			Q2:	qDR	xDR	netDR			Q2:	qNR	xNR	netNR
+			Q3:	qOR	xOR	netOR			Q3:	qDR	xDR	netDR			Q3:	qNR	xNR	netNR
+			Q4:	qOR	xOR	netOR			Q4:	qDR	xDR	netDR			Q4:	qNR	xNR	netNR
+
+	Output Array Format(1x2):
+		ORtg(1x2):			DRtg(1x2):
+			qLabel	^netNR		qLabel	^netNR
+
+	FETCH ORtg FOR EACH quarter FROM nba_stats.csv AND INSERT_INTO dataArray
+	COMPUTE cross-comparison FOR EACH quarter AND INSERT_INTO dataArray
+	COMPUTE netOR FOR EACH quarter AND INSERT_INTO dataArray
+
+	FETCH DRtg FOR EACH quarter FROM nba_stats.csv AND INSERT_INTO dataArray
+	COMPUTE cross-comparison FOR EACH quarter AND INSERT_INTO dataArray
+	COMPUTE netDR FOR EACH quarter AND INSERT_INTO dataArray
+
+	COMPUTE EACH quater FOR netRtg AND INSERT_INTO dataArray
+	COMPUTE cross-comparison FOR EACH quarter AND INSERT_INTO dataArray
+	COMPUTE netNR FOR EACH quarter AND INSERT_INTO dataArray
+
+	FIND LOWEST netNR FROM dataArray['NetRtg'] EXTRACT quarterLabel AND netNR
+	INSERT [quarterLabel, lowestNetNR] INTO outputArray
+
+	GRAPH EACH team as TUPLE USING dataArray
+		x1 = xOR AND y1 = xDR
+		x2 = qOR AND y2 = qDR
+		WHERE quarter == qLabel
+
+		(x1, y1) MARKER = team_logo_img
+		(x2, y2) MARKER COLOR = team_primary_color
+		LINE GRAPHED AS arrow
+		LABEL LINE with lowestNetNR
+
+	GRAPH X-AXIS LABEL = 'Team Offensive Rating'
+	GRAPH X-AXIS RANGE = [90, 120]
+	GRAPH Y-AXIS LABEL = 'Team Defensive Rating'
+	GRAPH Y-AXIS RANGE = [120, 90]
+
+	# (UpperRight) Quad 1: +Offense, +Defense
+	# (UpperLeft) Quad 2: -Offense,+Defense
+	# (LowerLeft) Quad 3: -Offense,-Defense
+	# (LowerRight) Quad 4: +Offense,-Defense 
